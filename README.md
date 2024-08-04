@@ -1,3 +1,8 @@
+<p align="center">
+  <img src="public/icon.svg" alt="Task Timer Logo" width="150"/>
+</p>
+
+
 # Task Timer
 
 **Task Timer** is a simple and intuitive task management application designed to help you stay focused and organized. This app features a customizable countdown timer to keep track of time for different tasks or activities.
