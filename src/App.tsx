@@ -10,42 +10,41 @@ const App: React.FC = () => {
     const urlMinutes = params.get('minutes');
     const urlTask = params.get('task');
 
-    const storedMinutes = localStorage.getItem('minutes');
-    const storedStartTime = localStorage.getItem('startTime');
-    const currentTime = Math.floor(Date.now() / 1000);
-
     let newMinutes: number;
+    const storedMinutes = localStorage.getItem('minutes');
+    const storedTask = localStorage.getItem('task');
 
-    if (storedStartTime && storedMinutes) {
-      const startTime = parseInt(storedStartTime, 10);
-      const minutesFromStorage = parseInt(storedMinutes, 10);
-      const elapsedTime = currentTime - startTime;
+    if (urlMinutes) {
+      newMinutes = parseInt(urlMinutes, 10);
+      if (newMinutes < 0) newMinutes *= -1;
 
-      if (elapsedTime >= minutesFromStorage * 60) {
-        // Timer has ended, reset the timer
-        localStorage.setItem('startTime', currentTime.toString());
-        newMinutes = minutesFromStorage;
-      } else {
-        // Timer is still running, use the stored values
-        newMinutes = minutesFromStorage;
+      if (
+        (urlTask && urlTask !== storedTask) ||
+        newMinutes !== parseInt(storedMinutes || '0', 10)
+      ) {
+        // If URL minutes are different from stored, update localStorage and reset start time
+        localStorage.setItem('minutes', newMinutes.toString());
+        localStorage.removeItem('startTime'); // Remove the old start time
+      }
+    } else if (storedMinutes) {
+      newMinutes = parseInt(storedMinutes, 10);
+
+      const storedStartTime = localStorage.getItem('startTime');
+      const currentTime = Math.floor(Date.now() / 1000);
+
+      if (storedStartTime && storedMinutes) {
+        const startTime = parseInt(storedStartTime, 10);
+        const minutesFromStorage = parseInt(storedMinutes, 10);
+        const elapsedTime = currentTime - startTime;
+
+        if (elapsedTime >= minutesFromStorage * 60) {
+          // Timer has ended, reset the timer
+          localStorage.setItem('startTime', currentTime.toString());
+        }
       }
     } else {
-      // No stored start time or minutes, use default or URL values
-      if (urlMinutes) {
-        newMinutes = parseInt(urlMinutes, 10);
-        if (newMinutes !== parseInt(storedMinutes || '0', 10)) {
-          // If URL minutes are different from stored, update localStorage and reset start time
-          localStorage.setItem('minutes', newMinutes.toString());
-          localStorage.removeItem('startTime'); // Remove the old start time
-        }
-      } else if (storedMinutes) {
-        newMinutes = parseInt(storedMinutes, 10);
-      } else {
-        newMinutes = 30; // Default value
-        localStorage.setItem('minutes', newMinutes.toString());
-      }
-      // Reset start time if the timer is not already running
-      localStorage.setItem('startTime', currentTime.toString());
+      newMinutes = 30; // Default value
+      localStorage.setItem('minutes', newMinutes.toString());
     }
 
     setMinutes(newMinutes);
@@ -54,7 +53,6 @@ const App: React.FC = () => {
       setTaskMessage(urlTask);
       localStorage.setItem('task', urlTask);
     } else {
-      const storedTask = localStorage.getItem('task');
       if (storedTask) {
         setTaskMessage(storedTask);
       }
